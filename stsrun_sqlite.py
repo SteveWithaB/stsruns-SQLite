@@ -522,7 +522,7 @@ def LoadRun(rundata):
     Shops(rundata)
 
 def main():
-    runpath = "//home//sbegy//Documents//Python//stsruns//0//"
+    runpath = "//path//to//runs//"
     filenames = listdir(runpath)
     filenames.sort()
     for file in filenames:
