@@ -532,7 +532,7 @@ def main():
     # Below is needed to set object types in shoppurchases table due to run data not specifying object type of purchases
     # The referenced table, s_object, is a static table containing all cards, relics, and potions from the base game
     # Data includes both internal and visible names. s_object can obviously contain data from mods as well
-    updstmt = "UPDATE shoppurchases set object_type = (select object_type from s_object where internal_id = SUBSTR(shoppurchases.object_name, 0, case when instr(shoppurchases.object_name,'+') > 0 then instr(shoppurchases.object_name,'+')-1 else length(shoppurchases.object_name) end))"
+    updstmt = "UPDATE shoppurchases set object_type = (select object_type from s_object where internal_id = SUBSTR(shoppurchases.object_name, 0, case when instr(shoppurchases.object_name,'+') > 0 then instr(shoppurchases.object_name,'+') else length(shoppurchases.object_name) end))"
     UpdateData(updstmt)
     
 if __name__ == "__main__":
