@@ -372,6 +372,7 @@ def Events(play_id, timestamp, event_choices, falling_options):
             stmt = "INSERT INTO fallinglog values (?,?,?,?)"
             InsertData(stmt, falling_list)
         event_list.append((play_id, timestamp, floor, event_name, player_choice, str(cards_removed),damage_healed,gold_gain,damage_taken,str(relics_obtained),max_hp_gain,max_hp_loss,str(potions_obtained),gold_loss,str(cards_upgraded),str(cards_obtained),str(relics_lost)))
+    event_list = list(dict.fromkeys(event_list))
     stmt = "INSERT INTO events values (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)"
     InsertData(stmt,event_list)
 
