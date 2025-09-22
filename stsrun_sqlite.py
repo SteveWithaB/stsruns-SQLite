@@ -4,14 +4,27 @@
 # Some refactoring/optimizing can be done but this first pass is to prove it can work
 # This is dependent on connecting to a SQLite database with defined tables. Obviously can be changed to any DB type
 # I've added comments below where I think they were needed
+# Minimum run timestamp that can be used is 1653413444
 
 import json
 import sqlite3
 from os import listdir
+import os
+from urllib.error import HTTPError
+import urllib.request
+import zipfile
 
 # Main function for inserting data
 # values should be a list of tuples containing column data in order of columns in the target table
 # values could have a differnt order if stmt explicitly gives the order the values are in
+def GetData(stmt):
+    cnx = sqlite3.connect('stsruns.db')
+    cursor = cnx.cursor()
+    sqlreturn = cursor.execute(stmt)
+    datareturn = sqlreturn.fetchall()
+    cnx.close()
+    return datareturn
+
 def InsertData(stmt,values):
     cnx = sqlite3.connect('stsruns.db')
     cursor=cnx.cursor()
@@ -523,18 +536,40 @@ def LoadRun(rundata):
     Shops(rundata)
 
 def main():
-    runpath = "//path//to//runs//"
-    filenames = listdir(runpath)
-    filenames.sort()
-    for file in filenames:
-        rfile = open(runpath+file,"r")
-        LoadRun(json.loads(rfile.read()))
-        rfile.close()
-    # Below is needed to set object types in shoppurchases table due to run data not specifying object type of purchases
-    # The referenced table, s_object, is a static table containing all cards, relics, and potions from the base game
-    # Data includes both internal and visible names. s_object can obviously contain data from mods as well
-    updstmt = "UPDATE shoppurchases set object_type = (select object_type from s_object where internal_id = SUBSTR(shoppurchases.object_name, 0, case when instr(shoppurchases.object_name,'+') > 0 then instr(shoppurchases.object_name,'+') else length(shoppurchases.object_name) end))"
-    UpdateData(updstmt)
+    nextrun = GetData("SELECT MAX(TIMESTAMP)+1 FROM RUNINFO")[0][0]
+    if nextrun is None:
+        nextrun = 1653413444
+    url = "https://baalorlord.tv/archive/0/"
+    out_file = open(str(os.getcwd()) + "/" + str(nextrun) + ".zip", "wb")
+    try:
+        response = urllib.request.urlopen(url+str(nextrun)+".zip")
+        data = response.read()
+        out_file.write(data)
+        zippath = out_file.name
+        out_file.close()
+        zip_ref = zipfile.ZipFile(zippath, 'r')
+        filenames = zip_ref.namelist()
+        filenames.sort()
+        zip_ref.extractall(str(os.getcwd()))
+    except HTTPError as err:
+        print(err)
+        removefile = out_file.name
+        out_file.close()
+        os.remove(removefile)
+#    runpath = "//home//sbegy//Documents//Python//stsruns//0//"
+#    filenames = listdir(runpath)
+#    filenames.sort()
+    if 'filenames' in locals():
+        for file in filenames:
+            rfile = open(str(os.getcwd())+"/"+file,"r")
+            LoadRun(json.loads(rfile.read()))
+            rfile.close()
+            os.remove(file)
+        # Below is needed to set object types in shoppurchases table due to run data not specifying object type of purchases
+        # The referenced table, s_object, is a static table containing all cards, relics, and potions from the base game
+        # Data includes both internal and visible names. s_object can obviously contain data from mods as well
+        updstmt = "UPDATE shoppurchases set object_type = (select object_type from s_object where internal_id = SUBSTR(shoppurchases.object_name, 1, case when instr(shoppurchases.object_name,'+') > 0 then instr(shoppurchases.object_name,'+')-1 else length(shoppurchases.object_name) end)) where object_type = ''"
+        UpdateData(updstmt)
     
 if __name__ == "__main__":
     main()
@@ -784,3 +819,4 @@ CREATE TABLE `shopskipped` (
   `object_name` varchar(100) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 """
+
