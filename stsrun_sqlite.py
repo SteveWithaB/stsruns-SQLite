@@ -581,7 +581,7 @@ def main():
         removefile = out_file.name
         out_file.close()
         os.remove(removefile)
-#    LoadObjects() --Only needed if needing to load s_object table
+#    LoadObjects() # Only needed if needing to load s_object table
     if 'filenames' in locals():
         for file in filenames:
             rfile = open(str(os.getcwd())+"/"+file,"r")
