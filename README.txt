@@ -1,1 +1,1 @@
-This is a python script to load Slay the Spire run history files, specifically from Baalorlord's run history, into a SQL database. The default is configured for MySQL, while stsruns_sqlite is (obviously) for SQLite
+This is a python script to load Slay the Spire run history files, specifically from Baalorlord's run history, into a SQL database. The script is currently designed for SQLite purposes. An empty database is provided and would populate in the first run.
