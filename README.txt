@@ -1,1 +1,2 @@
 This is a python script to load Slay the Spire run history files, specifically from Baalorlord's run history, into a SQL database. The script is currently designed for SQLite purposes. An empty database is provided and would populate in the first run.
+NOTE: On first run there is a single line to un-comment so that a static s_object table gets loaded. It calls a LoadObject function which uses a master data.json file from the Slaytabase project.
